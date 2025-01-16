@@ -2,9 +2,9 @@
 
 require 'dotenv/load'
 
-module RubyChangelog
+class EasyChangelog
   class Configuration
-    attr_accessor :changelog_filename, :main_branch, :filename_max_length
+    attr_accessor :changelog_filename, :main_branch, :filename_max_length, :include_empty_task_id, :tasks_url
     attr_reader :entries_path, :unreleased_header, :entry_path_format, :user_signature, :type_mapping
     attr_writer :repo_url
 
@@ -19,8 +19,10 @@ module RubyChangelog
 
       @filename_max_length = 50
       @type_mapping = { new: 'New features', fix: 'Bug fixes' }
+      @include_empty_task_id = false
 
-      @repo_url = ENV["REPOSITORY_URL"]
+      @repo_url = ENV.fetch('REPOSITORY_URL', nil)
+      @tasks_url = ENV.fetch('TASKS_URL', nil)
     end
 
     def repo_url
@@ -64,7 +66,10 @@ module RubyChangelog
     end
 
     def entry_path_match_regexp
-      formula = @entry_path_format.gsub(/<(\w+)>/) { |_match| "(?<#{Regexp.last_match(1)}>.+)" }
+      formula = @entry_path_format.gsub(/<(\w+)>/) do |match|
+        matcher = match == '<type>' ? '[^_]' : '.'
+        "(?#{match}#{matcher}+)"
+      end
 
       Regexp.new("(?:#{entries_path})?#{formula}")
     end

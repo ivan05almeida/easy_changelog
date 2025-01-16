@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative 'lib/ruby_changelog/version'
+require_relative 'lib/easy_changelog/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'ruby_changelog'
-  spec.version = RubyChangelog::VERSION
+  spec.name = 'easy_changelog'
+  spec.version = EasyChangelog::VERSION
   spec.authors = ['Ivan de Paula Almeida Filho']
   spec.email = ['ivan05filho@gmail.com']
 
   spec.summary = 'Small tool to generate a changelog file based on git commits.'
   spec.description = 'Changelog generator, based on Rubocop contributing section.'
-  spec.homepage = 'https://github.com/ivan05almeida/ruby-changelog'
+  spec.homepage = 'https://github.com/ivan05almeida/easy_changelog'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.6.0'
 

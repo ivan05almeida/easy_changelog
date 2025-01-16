@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'ruby_changelog/version'
-require 'ruby_changelog/configuration'
-require 'ruby_changelog/entry'
+require 'easy_changelog/version'
+require 'easy_changelog/configuration'
+require 'easy_changelog/entry'
 
-module RubyChangelog
+class EasyChangelog
   HEADER = /### (.*)/.freeze
   CONTRIBUTOR = '[@%<user>s]: https://github.com/%<user>s'
   EOF = "\n"
@@ -12,11 +12,11 @@ module RubyChangelog
   class Error < StandardError; end
   class ConfigurationError < StandardError; end
 
-  require 'ruby_changelog/railtie' if defined?(Rails)
+  require 'easy_changelog/railtie' if defined?(Rails)
 
   class << self
     def configuration
-      @configuration ||= RubyChangelog::Configuration.new
+      @configuration ||= EasyChangelog::Configuration.new
     end
 
     def configure
@@ -28,10 +28,7 @@ module RubyChangelog
     end
 
     def entry_paths
-      dir_name = RubyChangelog.configuration.entries_path.dup
-      FileUtils.mkdir_p(dir_name)
-
-      Dir["#{dir_name}*"]
+      Dir["#{EasyChangelog.configuration.entries_path}*"]
     end
 
     def read_entries
@@ -39,7 +36,7 @@ module RubyChangelog
     end
   end
 
-  def initialize(content: File.read(PATH), entries: Changelog.read_entries)
+  def initialize(content: File.read(EasyChangelog.configuration.changelog_filename), entries: EasyChangelog.read_entries)
     require 'strscan'
 
     parse(content)
@@ -51,7 +48,7 @@ module RubyChangelog
   end
 
   def merge!
-    File.write(RubyChangelog.configuration.changelog_filename, merge_content)
+    File.write(EasyChangelog.configuration.changelog_filename, merge_content)
     self
   end
 
@@ -78,21 +75,21 @@ module RubyChangelog
       entry.match(/\. \((?<contributors>.+)\)\n/)[:contributors].split(',')
     end
 
-    contributors.join.scan(RubyChangelog.configuration.user_signature).flatten
+    contributors.join.scan(EasyChangelog.configuration.user_signature).flatten
   end
 
   private
 
   def merge_entries(entry_map)
     all = @unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
-    canonical = RubyChangelog.configuration.type_mapping.values.to_h { |v| [v, nil] }
+    canonical = EasyChangelog.configuration.type_mapping.values.to_h { |v| [v, nil] }
     canonical.merge(all).compact
   end
 
   def parse(content)
     ss = StringScanner.new(content)
 
-    @header = ss.scan_until(RubyChangelog.configuration.unreleased_header)
+    @header = ss.scan_until(EasyChangelog.configuration.unreleased_header)
     @unreleased = parse_release(ss.scan_until(/\n(?=## )/m))
     @rest = ss.rest
   end
@@ -113,7 +110,7 @@ module RubyChangelog
     changes = Hash.new { |h, k| h[k] = [] }
 
     path_content_map.each do |path, content|
-      header = RubyChangelog.configuration.type_mapping.fetch(entry_type(path))
+      header = EasyChangelog.configuration.type_mapping.fetch(entry_type(path))
 
       changes[header].concat(content.lines.map(&:chomp))
     end
@@ -122,6 +119,6 @@ module RubyChangelog
   end
 
   def entry_type(path)
-    RubyChangelog.configuration.entry_path_match_regexp.match(path)[:type].to_sym
+    EasyChangelog.configuration.entry_path_match_regexp.match(path)[:type].to_sym
   end
 end

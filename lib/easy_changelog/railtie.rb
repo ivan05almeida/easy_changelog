@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'ruby_changelog'
+require 'easy_changelog'
 require 'rails'
 
-module RubyChangelog
+class EasyChangelog
   class Railtie < Rails::Railtie
-    railtie_name :ruby_changelog
+    railtie_name :easy_changelog
 
     rake_tasks do
       load 'tasks/changelog.rake'

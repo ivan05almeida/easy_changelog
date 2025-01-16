@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-require 'ruby_changelog'
+require 'easy_changelog'
+require 'easy_changelog/task_options_parser'
 
 namespace :changelog do
-  RubyChangelog.configuration.changelog_types.each do |type|
+  EasyChangelog.configuration.changelog_types.each do |type|
     desc "Create a Changelog entry (#{type})"
-    task type, [:id] do |_task, args|
-      ref_type = :pull if args[:id]
-      path = Changelog::Entry.new(type: type, ref_id: args[:id], ref_type: ref_type).write
+    task type do
+      options = EasyChangelog::TaskOptionsParser.parse(type, ARGV)
+      options[:type] = type
+
+      entry = EasyChangelog::Entry.new(**options)
+      path = entry.write
       cmd = "git add #{path}"
       sh cmd
       puts "Entry '#{path}' created and added to git index"
@@ -16,9 +20,9 @@ namespace :changelog do
 
   desc 'Merge entries and delete them'
   task :merge do
-    raise 'No entries!' unless Changelog.pending?
+    raise 'No entries!' unless EasyChangelog.pending?
 
-    Changelog.new.merge!.and_delete!
+    EasyChangelog.new.merge!.and_delete!
     cmd = "git commit -a -m 'Update Changelog'"
     puts cmd
     sh cmd
@@ -26,7 +30,7 @@ namespace :changelog do
 
   desc 'Check for no pending changelog entries'
   task :check_clean do
-    next unless Changelog.pending?
+    next unless EasyChangelog.pending?
 
     puts '*** Pending changelog entries!'
     puts 'Do `bundle exec rake changelog:merge`'

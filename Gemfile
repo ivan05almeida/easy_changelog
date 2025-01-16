@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in ruby-changelog.gemspec
+# Specify your gem's dependencies in easy_changelog.gemspec
 gemspec
 
 gem 'dotenv', '~> 2.7'

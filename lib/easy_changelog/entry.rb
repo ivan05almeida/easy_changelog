@@ -1,22 +1,26 @@
 # frozen_string_literal: true
 
-module RubyChangelog
-  Entry = Struct.new(:type, :body, :ref_type, :ref_id, :user, keyword_init: true) do
-    def initialize(type:, body: last_commit_title, ref_type: nil, ref_id: nil, user: github_user)
+class EasyChangelog
+  Entry = Struct.new(:type, :body, :ref_type, :ref_id, :task_id, :tasks_url, :user, keyword_init: true) do
+    def initialize(type:, body: last_commit_title, ref_type: nil, ref_id: nil, task_id: nil, tasks_url: nil,
+                   user: github_user)
       id, body = extract_id(body)
-      ref_id ||= id || 'x'
-      ref_type ||= id ? :issues : :pull
+      ref_id ||= id || last_commit_id
+      ref_type ||= id ? :pull : :commit
       super
     end
 
     def write
+      dir_name = EasyChangelog.configuration.entries_path
+      FileUtils.mkdir_p(dir_name) unless File.directory?(dir_name)
+
       File.write(path, content)
       path
     end
 
     def path
       format(
-        RubyChangelog.configuration.entry_path_template,
+        EasyChangelog.configuration.entry_path_template,
         type: type, name: str_to_filename(body), timestamp: Time.now.strftime('%Y%m%d%H%M%S')
       )
     end
@@ -25,15 +29,31 @@ module RubyChangelog
       title = body.dup
       title += '.' unless title.end_with? '.'
 
-      "* #{ref}: #{title} ([@#{user}][])\n"
+      "* #{ref}: #{task_ref} #{title} ([@#{user}][])\n"
     end
 
     def ref
-      "[##{ref_id}](#{RubyChangelog.configuration.repo_url}/#{ref_type}/#{ref_id})"
+      raise ArgumentError, 'ref_type must be issues, pull, or commit' unless %w[issues pull commit].include?(ref_type)
+
+      "[##{ref_id}](#{EasyChangelog.configuration.repo_url}/#{ref_type}/#{ref_id})"
+    end
+
+    def task_ref
+      return EasyChangelog.configuration.include_empty_task_id ? '[] ' : '' if task_id.nil? || task_id.empty?
+
+      link = "[#{task_id}]"
+      base_url = tasks_url || EasyChangelog.configuration.tasks_url
+      link += "(#{base_url}/#{task_id})" if base_url
+
+      link
     end
 
     def last_commit_title
       `git log -1 --pretty=%B`.lines.first.chomp
+    end
+
+    def last_commit_id
+      `git log -n1 --format="%h"`.chomp
     end
 
     def extract_id(body)
@@ -47,7 +67,7 @@ module RubyChangelog
         .map { |s| prettify(s) }
         .inject do |result, word|
           s = "#{result}_#{word}"
-          return result if s.length > MAX_LENGTH
+          return result if s.length > EasyChangelog.configuration.filename_max_length
 
           s
         end
