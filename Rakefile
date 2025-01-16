@@ -13,4 +13,7 @@ require 'rubocop/rake_task'
 
 RuboCop::RakeTask.new
 
+path = File.expand_path(__dir__)
+Dir.glob("#{path}/lib/ruby_changelog/tasks/**/*.rake").each { |f| import f }
+
 task default: %i[test rubocop]

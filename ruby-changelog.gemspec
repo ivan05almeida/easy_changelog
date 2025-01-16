@@ -3,7 +3,7 @@
 require_relative 'lib/ruby_changelog/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'ruby-changelog'
+  spec.name = 'ruby_changelog'
   spec.version = RubyChangelog::VERSION
   spec.authors = ['Ivan de Paula Almeida Filho']
   spec.email = ['ivan05filho@gmail.com']

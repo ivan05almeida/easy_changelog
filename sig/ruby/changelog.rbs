@@ -1,6 +1,4 @@
-module Ruby
-  module Changelog
-    VERSION: String
-    # See the writing guide of rbs: https://github.com/ruby/rbs#guides
-  end
+module RubyChangelog
+  VERSION: String
+  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
 end
