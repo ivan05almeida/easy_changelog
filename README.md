@@ -55,6 +55,20 @@ By default if a ref id is given the ref-type default will be pull, if it's blank
 
 You can still pass a ref-id and set ref-type to issues to add a reference to a issue card
 
+### Prepare changelog to deployment/release
+
+To add the entries to your changelog just need to run
+
+```
+$ bundle exec rake changelog:merge
+```
+
+If you want to check if there are entries to merge:
+```
+$ bundle exec rake changelog:check_clean
+```
+
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
