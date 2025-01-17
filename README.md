@@ -1,8 +1,6 @@
 # EasyChangelog
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/easy_changelog`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+<strong>EasyChangelog</strong> is a tool easily manage your project changelog. This project is based on Rubocop changelog style with more customizations to your needs.
 
 ## Installation
 
@@ -16,7 +14,46 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+### Configuration
+
+Write an easy_changelog.rb at the initiliazers folder in order to config the gem accordingly to your project
+
+```ruby
+EasyChangelog.configure do |config|
+    config.entries_path = 'changelog/'                      # the folder where the changelog entries will be stored
+    config.changelog_filename = 'CHANGELOG.md'              # the filename of your changelog
+    config.main_branch = 'master'                           # main branch for repository
+    config.filename_max_length = 50                         # max filename length
+    config.include_empty_task_id = false                    # includes a [] when task id and the project still need to track tasks without tickets
+
+    config.unreleased_header = '## master (unreleased)'     # Header of changelog where the unreleased entries are located
+    config.user_signature = /\[@([\w-]+)\]\[\]/             # Regexp to list unique contributors of the project
+
+    config.type_mapping = {                                 # Entry types and their Section Names to be displayed at Changelog
+        new: 'New features',
+        fix: 'Bug fixes'
+    }
+
+    config.repo_url = <GITHUB_REPO_URL>                     # URL to your repository (Can also be defined with REPOSITORY_URL var var)
+    config.tasks_url = <YOUR_ISSUE_TRACKING_URL>            # URL to your organization issue tracker (ex: JIRA, Asana, Wrike. Can also be defined with REPOSITORY_URL env var)
+end
+```
+
+### Entries Types
+
+By default this gem supports new and fix changelog entries. Check the Configuration section to see how you can change this with type_mapping option.
+
+For each supported type, you can call their rake task:
+
+```
+$ bundle exec rake changelog:new -- --ref-id=1234 --ref-type=pull
+```
+
+To know all options available you can add `--help` option to the command
+
+By default if a ref id is given the ref-type default will be pull, if it's blank it will be commit and the changelog will then contain reference with the short git commit ID instead.
+
+You can still pass a ref-id and set ref-type to issues to add a reference to a issue card
 
 ## Development
 

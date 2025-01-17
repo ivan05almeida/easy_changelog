@@ -6,7 +6,7 @@ class EasyChangelog
   class Configuration
     attr_accessor :changelog_filename, :main_branch, :filename_max_length, :include_empty_task_id, :tasks_url
     attr_reader :entries_path, :unreleased_header, :entry_path_format, :user_signature, :type_mapping
-    attr_writer :repo_url
+    attr_writer :repo_url, :tasks_url
 
     def initialize
       @entries_path = 'changelog/'
@@ -33,14 +33,6 @@ class EasyChangelog
 
     def unreleased_header=(value)
       @unreleased_header = /#{Regexp.escape(value)}/m
-    end
-
-    def entry_path_format=(value)
-      unless %w[<type> <name> <timestamp>].all? { |key| value.include?(key) }
-        raise ArgumentError, 'entry_path_template must include %<type>s, %<name>s and %<timestamp>s groups'
-      end
-
-      @entry_path_format = value
     end
 
     def entries_path=(value)
