@@ -1,6 +1,9 @@
 # Changelog
 
 ## master (unreleased)
+### Breaking Changes
+
+* [#e2b27fa](https://github.com/ivan05almeida/easy_changelog/commit/e2b27fa):  Add loose type mapping. ([@ivan05almeida][])
 
 ## 0.4.0 (2025-01-22)
 ### New features
