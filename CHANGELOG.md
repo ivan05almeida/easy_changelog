@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 0.3.2 (2025-01-22)
 ### Bug fixes
 
 * [#002a5fc](https://github.com/ivan05almeida/easy_changelog/commit/002a5fc):  Fix tasks not loading environment. ([@ivan05almeida][])
