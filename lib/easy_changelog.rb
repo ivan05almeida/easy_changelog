@@ -131,12 +131,12 @@ class EasyChangelog
     @header = ss.scan_until(EasyChangelog.configuration.unreleased_header)
     unreleased = ss.scan_until(/\n(?=## )/m)
 
-    if unreleased
-      @unreleased = parse_release(unreleased)
-      @rest = ss.rest
-    else
+    if unreleased.nil?
       @unreleased = parse_release(ss.rest)
       @rest = ''
+    else
+      @unreleased = parse_release(unreleased)
+      @rest = ss.rest
     end
   end
 
