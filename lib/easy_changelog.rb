@@ -43,6 +43,10 @@ class EasyChangelog
     def read_entries
       entry_paths.to_h { |path| [path, File.read(path)] }
     end
+
+    def release_count(pattern)
+      File.read(EasyChangelog.configuration.changelog_filename).scan(pattern).size
+    end
   end
 
   attr_reader :header, :entries
