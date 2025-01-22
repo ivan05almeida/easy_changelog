@@ -4,9 +4,14 @@ require 'easy_changelog'
 require 'easy_changelog/task_options_parser'
 
 namespace :changelog do
+  def environment
+    Rake.application['environment'].invoke if Rake::Task.task_defined?('environment')
+  end
+
   EasyChangelog.configuration.changelog_types.each do |type|
     desc "Create a Changelog entry (#{type})"
     task type do
+      environment
       options = EasyChangelog::TaskOptionsParser.parse(type, ARGV)
       options[:type] = type
 
@@ -20,6 +25,7 @@ namespace :changelog do
 
   desc 'Merge entries and delete them'
   task :merge do
+    environment
     raise 'No entries!' unless EasyChangelog.pending?
 
     EasyChangelog.merge_and_delete!
@@ -30,6 +36,7 @@ namespace :changelog do
 
   desc 'Check for no pending changelog entries'
   task :check_clean do
+    environment
     next unless EasyChangelog.pending?
 
     puts '*** Pending changelog entries!'
@@ -39,6 +46,7 @@ namespace :changelog do
 
   desc 'Add release entry'
   task :release do
+    environment
     EasyChangelog.release!
     cmd = "git commit -a -m 'Update Changelog'"
     puts cmd
