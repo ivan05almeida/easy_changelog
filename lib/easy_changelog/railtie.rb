@@ -8,7 +8,8 @@ class EasyChangelog
     railtie_name :easy_changelog
 
     rake_tasks do
-      load 'tasks/changelog.rake'
+      path = File.expand_path(__dir__)
+      Dir.glob("#{path}/tasks/**/*.rake").each { |f| load f }
     end
   end
 end

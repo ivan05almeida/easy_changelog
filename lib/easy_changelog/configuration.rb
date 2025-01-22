@@ -72,7 +72,7 @@ class EasyChangelog
     end
 
     def user_signature=(value)
-      raise ArgumentError, 'user_signature must be a Regexp' unless value.is_a?(Regexp)
+      raise ArgumentError, 'user_signature must be a Regexp' unless value.is_a?(Regexp) || value.nil?
 
       @user_signature = value
     end
