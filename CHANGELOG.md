@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 0.4.0 (2025-01-22)
 ### New features
 
 * [#51e9888](https://github.com/ivan05almeida/easy_changelog/commit/51e9888):  Allow user option. ([@ivan05almeida][])
