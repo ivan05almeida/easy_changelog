@@ -1,6 +1,9 @@
 # Changelog
 
 ## master (unreleased)
+### Bug fixes
+
+* [#e2b33b8](https://github.com/ivan05almeida/easy_changelog/commit/e2b33b8):  Fix railtie module. ([@ivan05almeida][])
 
 ## 0.3.0 (2025-01-22)
 ### New features
