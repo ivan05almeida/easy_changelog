@@ -1,6 +1,10 @@
 # Changelog
 
 ## master (unreleased)
+### New features
+
+* [#beb193a](https://github.com/ivan05almeida/easy_changelog/commit/beb193a):  Add release count method. ([@ivan05almeida][])
+* [#1623408](https://github.com/ivan05almeida/easy_changelog/commit/1623408):  Allow custom body entry. ([@ivan05almeida][])
 
 ## 0.2.0 (2025-01-22)
 ### New features
