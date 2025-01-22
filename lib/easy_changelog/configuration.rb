@@ -22,7 +22,7 @@ class EasyChangelog
       @filename_max_length = 50
       @type_mapping = {
         breaking: { title: 'Breaking Changes', level: :major },
-        new: { title: 'New features', level: :minor },
+        feature: { title: 'New features', level: :minor },
         fix: { title: 'Bug fixes', level: :patch }
       }
       @include_empty_task_id = false
@@ -66,9 +66,13 @@ class EasyChangelog
     end
 
     def type_mapping=(value)
-      raise ArgumentError, 'type_mapping must be a Hash' unless value.is_a?(Hash)
+      raise ArgumentError, 'type_mapping must be a Hash or :loose' unless value.is_a?(Hash) || value == :loose
 
       @type_mapping = value
+    end
+
+    def loose?
+      @type_mapping == :loose
     end
 
     def user_signature=(value)
@@ -78,14 +82,20 @@ class EasyChangelog
     end
 
     def changelog_types
+      return [] if @type_mapping == :loose
+
       @type_mapping.keys
     end
 
     def sections
+      return [''] if @type_mapping == :loose
+
       @type_mapping.values.map { |v| v[:title] }
     end
 
     def section_for(type)
+      return '' if @type_mapping == :loose
+
       @type_mapping[type][:title]
     end
 

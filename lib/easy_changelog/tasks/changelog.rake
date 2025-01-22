@@ -23,6 +23,19 @@ namespace :changelog do
     end
   end
 
+  desc 'Create a Changelog entry (default)'
+  task :new do
+    environment
+    options = EasyChangelog::TaskOptionsParser.parse(:new, ARGV)
+    options[:type] = :new
+
+    entry = EasyChangelog::Entry.new(**options)
+    path = entry.write
+    cmd = "git add #{path}"
+    sh cmd
+    puts "Entry '#{path}' created and added to git index"
+  end
+
   desc 'Merge entries and delete them'
   task :merge do
     environment

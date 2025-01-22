@@ -81,7 +81,13 @@ class EasyChangelog
   def unreleased_content
     entry_map = parse_entries(@entries)
     merged_map = merge_entries(entry_map)
-    merged_map.flat_map { |header, things| ["### #{header}\n", *things, ''] }.join("\n")
+    merged_map.flat_map do |header, things|
+      if header.empty?
+        [*things, '']
+      else
+        ["### #{header}\n", *things, '']
+      end
+    end.join("\n")
   end
 
   def merge_content
@@ -142,14 +148,11 @@ class EasyChangelog
 
   # @return [Hash<type, Array<String>]]
   def parse_release(unreleased)
-    unreleased
-      .lines
-      .map(&:chomp)
-      .reject(&:empty?)
-      .slice_before(HEADER)
-      .to_h do |header, *entries|
-        [HEADER.match(header)[1], entries]
-      end
+    entries = unreleased.lines.map(&:chomp).reject(&:empty?)
+
+    return { '' => entries } if EasyChangelog.configuration.loose?
+
+    entries.slice_before(HEADER).to_h { |header, *header_entries| [HEADER.match(header)[1], header_entries] }
   end
 
   def parse_entries(path_content_map)
