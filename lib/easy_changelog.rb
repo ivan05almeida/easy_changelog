@@ -11,6 +11,7 @@ class EasyChangelog
 
   class Error < StandardError; end
   class ConfigurationError < StandardError; end
+  class EmptyReleaseError < StandardError; end
 
   require 'easy_changelog/railtie' if defined?(Rails)
 
@@ -27,6 +28,14 @@ class EasyChangelog
       entry_paths.any?
     end
 
+    def merge_and_delete!
+      new.merge_and_delete!
+    end
+
+    def release!
+      new.release!
+    end
+
     def entry_paths
       Dir["#{EasyChangelog.configuration.entries_path}*"]
     end
@@ -36,19 +45,32 @@ class EasyChangelog
     end
   end
 
-  def initialize(content: File.read(EasyChangelog.configuration.changelog_filename), entries: EasyChangelog.read_entries)
+  attr_reader :header, :entries
+
+  def initialize(content: File.read(EasyChangelog.configuration.changelog_filename),
+                 entries: EasyChangelog.read_entries)
     require 'strscan'
 
     parse(content)
     @entries = entries
   end
 
-  def and_delete!
-    @entries.each_key { |path| File.delete(path) }
+  def merge_and_delete!
+    merge!
+    delete!
   end
 
   def merge!
     File.write(EasyChangelog.configuration.changelog_filename, merge_content)
+    self
+  end
+
+  def delete!
+    @entries.each_key { |path| File.delete(path) }
+  end
+
+  def release!
+    File.write(EasyChangelog.configuration.changelog_filename, release_content)
     self
   end
 
@@ -64,7 +86,20 @@ class EasyChangelog
     merged_content << EOF
   end
 
+  def release_content
+    unreleased = unreleased_content
+    raise EmptyReleaseError, 'No unreleased content to release' if unreleased.empty?
+
+    release_message = EasyChangelog.configuration.release_message_template
+    release_message = "\n#{release_message}" unless release_message.start_with?("\n")
+
+    released_content = [@header, release_message, unreleased, @rest.chomp, *new_contributor_lines].join("\n")
+    released_content << EOF
+  end
+
   def new_contributor_lines
+    return [] unless EasyChangelog.configuration.user_signature
+
     unique_contributor_names = contributors.map { |user| format(CONTRIBUTOR, user: user) }.uniq
 
     unique_contributor_names.reject { |line| @rest.include?(line) }
@@ -82,7 +117,7 @@ class EasyChangelog
 
   def merge_entries(entry_map)
     all = @unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
-    canonical = EasyChangelog.configuration.type_mapping.values.to_h { |v| [v, nil] }
+    canonical = EasyChangelog.configuration.sections.to_h { |v| [v, nil] }
     canonical.merge(all).compact
   end
 
@@ -90,8 +125,15 @@ class EasyChangelog
     ss = StringScanner.new(content)
 
     @header = ss.scan_until(EasyChangelog.configuration.unreleased_header)
-    @unreleased = parse_release(ss.scan_until(/\n(?=## )/m))
-    @rest = ss.rest
+    unreleased = ss.scan_until(/\n(?=## )/m)
+
+    if unreleased
+      @unreleased = parse_release(unreleased)
+      @rest = ss.rest
+    else
+      @unreleased = parse_release(ss.rest)
+      @rest = ''
+    end
   end
 
   # @return [Hash<type, Array<String>]]
@@ -110,7 +152,7 @@ class EasyChangelog
     changes = Hash.new { |h, k| h[k] = [] }
 
     path_content_map.each do |path, content|
-      header = EasyChangelog.configuration.type_mapping.fetch(entry_type(path))
+      header = EasyChangelog.configuration.section_for(entry_type(path))
 
       changes[header].concat(content.lines.map(&:chomp))
     end

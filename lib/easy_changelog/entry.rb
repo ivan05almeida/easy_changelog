@@ -7,6 +7,8 @@ class EasyChangelog
       id, body = extract_id(body)
       ref_id ||= id || last_commit_id
       ref_type ||= id ? :pull : :commit
+      task_id ||= discover_task_id
+
       super
     end
 
@@ -54,6 +56,15 @@ class EasyChangelog
 
     def last_commit_id
       `git log -n1 --format="%h"`.chomp
+    end
+
+    def discover_task_id
+      return if EasyChangelog.configuration.task_id_regex.nil?
+
+      branch_name = `git rev-parse --abbrev-ref HEAD`
+      return if branch_name == EasyChangelog.configuration.main_branch
+
+      EasyChangelog.configuration.task_id_regex.match(branch_name)&.named_captures&.fetch('task_id', nil)
     end
 
     def extract_id(body)

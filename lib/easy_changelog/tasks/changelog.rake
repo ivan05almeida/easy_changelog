@@ -22,7 +22,7 @@ namespace :changelog do
   task :merge do
     raise 'No entries!' unless EasyChangelog.pending?
 
-    EasyChangelog.new.merge!.and_delete!
+    EasyChangelog.merge_and_delete!
     cmd = "git commit -a -m 'Update Changelog'"
     puts cmd
     sh cmd
@@ -35,5 +35,13 @@ namespace :changelog do
     puts '*** Pending changelog entries!'
     puts 'Do `bundle exec rake changelog:merge`'
     exit(1)
+  end
+
+  desc 'Add release entry'
+  task :release do
+    EasyChangelog.release!
+    cmd = "git commit -a -m 'Update Changelog'"
+    puts cmd
+    sh cmd
   end
 end

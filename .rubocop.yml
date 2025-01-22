@@ -2,6 +2,29 @@ AllCops:
   TargetRubyVersion: 2.6
   NewCops: enable
 
+Lint/EmptyBlock:
+  Exclude:
+    - 'lib/easy_changelog/task_options_parser.rb'
+Metrics/AbcSize:
+  Exclude:
+    - 'lib/easy_changelog/task_options_parser.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/easy_changelog/tasks/changelog.rake'
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Exclude:
+    - 'lib/easy_changelog/configuration.rb'
+    - 'lib/easy_changelog/task_options_parser.rb'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'lib/easy_changelog/entry.rb'
+
 Style/Documentation:
   Enabled: false
 
