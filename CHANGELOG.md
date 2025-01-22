@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 0.3.0 (2025-01-22)
 ### New features
 
 * [#beb193a](https://github.com/ivan05almeida/easy_changelog/commit/beb193a):  Add release count method. ([@ivan05almeida][])
