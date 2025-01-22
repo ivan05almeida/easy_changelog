@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 0.2.0 (2025-01-22)
 ### New features
 
 * [#b0faf01](https://github.com/ivan05almeida/easy_changelog/commit/b0faf01):  Initialize EasyChangelog gem. ([@ivan05almeida][])
