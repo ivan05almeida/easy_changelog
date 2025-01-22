@@ -1,6 +1,10 @@
 # Changelog
 
 ## master (unreleased)
+### Bug fixes
+
+* [#002a5fc](https://github.com/ivan05almeida/easy_changelog/commit/002a5fc):  Fix tasks not loading environment. ([@ivan05almeida][])
+* [#04cd53b](https://github.com/ivan05almeida/easy_changelog/commit/04cd53b):  Fix unreleased content when starting a new changelog. ([@ivan05almeida][])
 
 ## 0.3.1 (2025-01-22)
 ### Bug fixes
