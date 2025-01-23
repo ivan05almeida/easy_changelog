@@ -10,6 +10,12 @@ class EasyChangelog
     attr_reader :entries_path, :unreleased_header, :entry_path_format, :user_signature, :type_mapping, :task_id_regex
     attr_writer :repo_url, :release_message_template
 
+    CONFIG_PATHS = %w(
+      ./.easy_changelog.rb
+      ./config/initializers/easy_changelog.rb
+      ./config/easy_changelog.rb
+    )
+
     def initialize
       @entries_path = 'changelog/'
       @changelog_filename = 'CHANGELOG.md'
@@ -110,6 +116,15 @@ class EasyChangelog
 
     def entry_path_template
       File.join(entries_path, @entry_path_format.gsub(/<(\w+)>/) { |_match| "%<#{Regexp.last_match(1)}>s" })
+    end
+
+    def load_config
+      paths = CONFIG_PATHS.map { |path| File.expand_path(path) }
+      path = paths.select { |path| File.exist?(path) }.first
+
+      return unless path
+
+      load(path)
     end
   end
 end
