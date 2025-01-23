@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 1.1.0 (2025-01-23)
 ### New features
 
 * [#abaa9e4](https://github.com/ivan05almeida/easy_changelog/commit/abaa9e4):  Add custom config paths. ([@ivan05almeida][])
