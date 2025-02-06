@@ -1,37 +1,38 @@
 # frozen_string_literal: true
 
 class EasyChangelog
-  Entry = Struct.new(:type, :body, :ref_type, :ref_id, :task_id, :tasks_url, :user, keyword_init: true) do
-    def initialize(type:, body: last_commit_title, ref_type: nil, ref_id: nil, task_id: nil, tasks_url: nil,
-                   user: github_user)
-      id, body = extract_id(body)
+  Entry = Struct.new(:type, :body, :ref_type, :ref_id, :card_id, :cards_url, :branch_name, :user, keyword_init: true) do
+    def initialize(type:, body: last_commit_title, ref_type: nil, ref_id: nil, card_id: nil, cards_url: nil,
+                   user: github_user, branch_name: nil)
+      id, body = EasyChangelog::Utility.extract_id(body)
       ref_id ||= id || last_commit_id
       ref_type ||= id ? :pull : :commit
-      task_id ||= discover_task_id
+      card_id ||= EasyChangelog::Utility.discover_card_id(branch_name)
 
       super
     end
 
     def write
-      dir_name = EasyChangelog.configuration.entries_path
-      FileUtils.mkdir_p(dir_name) unless File.directory?(dir_name)
+      EasyChangelog::Utility.ensure_entries_dir_exists
 
       File.write(path, content)
       path
     end
 
     def path
-      format(
-        EasyChangelog.configuration.entry_path_template,
-        type: type, name: str_to_filename(body), timestamp: Time.now.strftime('%Y%m%d%H%M%S')
-      )
+      filename = EasyChangelog::Utility.str_to_filename(body)
+      options = { type: type, name: filename, timestamp: Time.now.strftime('%Y%m%d%H%M%S') }
+
+      format(EasyChangelog.configuration.entry_path_template, options)
     end
 
     def content
       title = body.dup
       title += '.' unless title.end_with? '.'
 
-      "* #{ref}: #{task_ref} #{title} ([@#{user}][])\n"
+      options = { ref: ref, card_ref: card_ref, title: title, username: user }
+
+      format(EasyChangelog.configuration.entry_row_template, options)
     end
 
     def ref
@@ -40,12 +41,12 @@ class EasyChangelog
       "[##{ref_id}](#{EasyChangelog.configuration.repo_url}/#{ref_type}/#{ref_id})"
     end
 
-    def task_ref
-      return EasyChangelog.configuration.include_empty_task_id ? '[] ' : '' if task_id.nil? || task_id.empty?
+    def card_ref
+      return EasyChangelog.configuration.include_empty_card_id ? '[] ' : '' if card_id.nil? || card_id.empty?
 
-      link = "[#{task_id}]"
-      base_url = tasks_url || EasyChangelog.configuration.tasks_url
-      link += "(#{base_url}/#{task_id})" if base_url
+      link = "[#{card_id}]"
+      base_url = cards_url || EasyChangelog.configuration.cards_url
+      link += "(#{base_url}/#{card_id})" if base_url
 
       link
     end
@@ -58,52 +59,11 @@ class EasyChangelog
       `git log -n1 --format="%h"`.chomp
     end
 
-    def discover_task_id
-      return if EasyChangelog.configuration.task_id_regex.nil?
-
-      branch_name = `git rev-parse --abbrev-ref HEAD`
-      return if branch_name == EasyChangelog.configuration.main_branch
-
-      EasyChangelog.configuration.task_id_regex.match(branch_name)&.named_captures&.fetch('task_id', nil)
-    end
-
-    def extract_id(body)
-      /^\[Fix(?:es)? #(\d+)\] (.*)/.match(body)&.captures || [nil, body]
-    end
-
-    def str_to_filename(str)
-      str
-        .split
-        .reject(&:empty?)
-        .map { |s| prettify(s) }
-        .inject do |result, word|
-          s = "#{result}_#{word}"
-          return result if s.length > EasyChangelog.configuration.filename_max_length
-
-          s
-        end
-    end
-
     def github_user
       user = `git config --global credential.username`.chomp
       warn 'Set your username with `git config --global credential.username "myusernamehere"`' if user.empty?
 
       user
-    end
-
-    private
-
-    def prettify(str)
-      str.gsub!(/\W/, '_')
-
-      # Separate word boundaries by `_`.
-      str.gsub!(/([A-Z]+)(?=[A-Z][a-z])|([a-z\d])(?=[A-Z])/) do
-        (Regexp.last_match(1) || Regexp.last_match(2)) << '_'
-      end
-
-      str.gsub!(/\A_+|_+\z/, '')
-      str.downcase!
-      str
     end
   end
 end

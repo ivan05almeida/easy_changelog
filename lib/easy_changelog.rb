@@ -2,6 +2,7 @@
 
 require 'easy_changelog/version'
 require 'easy_changelog/configuration'
+require 'easy_changelog/utility'
 require 'easy_changelog/entry'
 
 class EasyChangelog
@@ -55,7 +56,7 @@ class EasyChangelog
                  entries: EasyChangelog.read_entries)
     require 'strscan'
 
-    parse(content)
+    @header, @unreleased, @rest = EasyChangelog::Utility.parse_changelog(content)
     @entries = entries
   end
 
@@ -65,7 +66,7 @@ class EasyChangelog
   end
 
   def merge!
-    File.write(EasyChangelog.configuration.changelog_filename, merge_content)
+    EasyChangelog::Utility.update_changelog(merge_content)
     self
   end
 
@@ -74,7 +75,7 @@ class EasyChangelog
   end
 
   def release!
-    File.write(EasyChangelog.configuration.changelog_filename, release_content)
+    EasyChangelog::Utility.update_changelog(release_content)
     self
   end
 
@@ -116,50 +117,26 @@ class EasyChangelog
   end
 
   def contributors
-    contributors = @entries.values.flat_map do |entry|
-      entry.match(/\. \((?<contributors>.+)\)\n/)[:contributors].split(',')
+    @entries.values.flat_map do |entry|
+      EasyChangelog::Utility.attr_from_entry(:username, entry)&.gsub(/@/, '')
     end
-
-    contributors.join.scan(EasyChangelog.configuration.user_signature).flatten
   end
 
   private
 
   def merge_entries(entry_map)
-    all = @unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
+    all = @unreleased.merge(entry_map) do |_k, v1, v2|
+      EasyChangelog.configuration.entries_order == :desc ? v2.concat(v1) : v1.concat(v2)
+    end
     canonical = EasyChangelog.configuration.sections.to_h { |v| [v, nil] }
     canonical.merge(all).compact
-  end
-
-  def parse(content)
-    ss = StringScanner.new(content)
-
-    @header = ss.scan_until(EasyChangelog.configuration.unreleased_header)
-    unreleased = ss.scan_until(/\n(?=## )/m)
-
-    if unreleased.nil?
-      @unreleased = parse_release(ss.rest)
-      @rest = ''
-    else
-      @unreleased = parse_release(unreleased)
-      @rest = ss.rest
-    end
-  end
-
-  # @return [Hash<type, Array<String>]]
-  def parse_release(unreleased)
-    entries = unreleased.lines.map(&:chomp).reject(&:empty?)
-
-    return { '' => entries } if EasyChangelog.configuration.loose?
-
-    entries.slice_before(HEADER).to_h { |header, *header_entries| [HEADER.match(header)[1], header_entries] }
   end
 
   def parse_entries(path_content_map)
     changes = Hash.new { |h, k| h[k] = [] }
 
-    path_content_map.each do |path, content|
-      header = EasyChangelog.configuration.section_for(entry_type(path))
+    sorted_entries(path_content_map).each do |path, content|
+      header = EasyChangelog::Utility.section_for(path)
 
       changes[header].concat(content.lines.map(&:chomp))
     end
@@ -167,7 +144,10 @@ class EasyChangelog
     changes
   end
 
-  def entry_type(path)
-    EasyChangelog.configuration.entry_path_match_regexp.match(path)[:type].to_sym
+  def sorted_entries(path_content_map)
+    sorted = path_content_map.sort_by { |path, _content| EasyChangelog::Utility.attr_from_path(:timestamp, path) }
+    sorted = sorted.reverse if EasyChangelog.configuration.entries_order == :desc
+
+    sorted
   end
 end

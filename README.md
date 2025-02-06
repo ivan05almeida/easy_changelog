@@ -24,7 +24,7 @@ EasyChangelog.configure do |config|
     config.changelog_filename = 'CHANGELOG.md'              # the filename of your changelog
     config.main_branch = 'master'                           # main branch for repository
     config.filename_max_length = 50                         # max filename length
-    config.include_empty_task_id = false                    # includes a [] when task id and the project still need to track tasks without tickets
+    config.include_empty_card_id = false                    # includes a [] when task id and the project still need to track tasks without tickets
 
     config.unreleased_header = '## master (unreleased)'     # Header of changelog where the unreleased entries are located
     config.user_signature = /\[@([\w-]+)\]\[\]/             # Regexp to list unique contributors of the project
@@ -35,7 +35,7 @@ EasyChangelog.configure do |config|
     }
 
     config.repo_url = <GITHUB_REPO_URL>                     # URL to your repository (Can also be defined with REPOSITORY_URL var var)
-    config.tasks_url = <YOUR_ISSUE_TRACKING_URL>            # URL to your organization issue tracker (ex: JIRA, Asana, Wrike. Can also be defined with REPOSITORY_URL env var)
+    config.cards_url = <YOUR_ISSUE_TRACKING_URL>            # URL to your organization issue tracker (ex: JIRA, Asana, Wrike. Can also be defined with REPOSITORY_URL env var)
 end
 ```
 

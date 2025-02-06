@@ -12,11 +12,12 @@ class EasyChangelog
       opts.banner = "Usage: rake changelog:#{type} [options]"
 
       opts.on('-u', '--user=ARG', 'Git Username') { |arg| options[:user] = arg }
-      opts.on('-b', '--body=ARG', 'Changelog Body Entry') { |arg| options[:body] = arg }
+      opts.on('-b', '--branch=ARG', 'Branch Name') { |arg| options[:branch_name] = arg }
+      opts.on('-t', '--title=ARG', 'Changelog Title Entry') { |arg| options[:body] = arg }
       opts.on('-r', '--ref-id=ARG', 'Ref ID') { |arg| options[:ref_id] = arg }
       opts.on('-R', '--ref-type=ARG', 'Ref type (issues|pull|commit)') { |arg| options[:ref_type] = arg }
-      opts.on('-t', '--task-id=ARG', 'Task ID') { |arg| options[:task_id] = arg }
-      opts.on('-T', '--task-url=ARG', 'Tasks URL') { |arg| options[:tasks_url] = arg }
+      opts.on('-c', '--card-id=ARG', 'Card ID') { |arg| options[:card_id] = arg }
+      opts.on('-C', '--cards-url=ARG', 'Cards base URL') { |arg| options[:cards_url] = arg }
 
       opts.on('-h', '--help', 'Prints this helper') do
         puts opts
