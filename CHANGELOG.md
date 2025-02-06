@@ -1,6 +1,8 @@
 # Changelog
 
 ## master (unreleased)
+
+## 1.2.0 (2025-02-06)
 ### New features
 
 * [#935a524](https://github.com/ivan05almeida/easy_changelog/commit/935a524):  Add more customizations. (ivan05almeida)
